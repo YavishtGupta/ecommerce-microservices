@@ -36,7 +36,7 @@ public class OrderServiceImpl implements OrderService{
             throw new RuntimeException("Customer not found: " + request.getCustomer_id());
         }
 
-        List<Product> products = request.getProduct_id().stream()
+        request.getProduct_id().stream()
                 .map(id -> {
                     try {
                         Product product = restTemplate.getForObject(PRODUCT_SERVICE_URL + id, Product.class);
