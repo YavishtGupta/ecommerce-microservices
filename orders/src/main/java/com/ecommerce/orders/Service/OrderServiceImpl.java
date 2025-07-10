@@ -3,13 +3,16 @@ import com.ecommerce.orders.Dto.Customer;
 import com.ecommerce.orders.Dto.OrderRequest;
 import com.ecommerce.orders.Dto.OrderResponse;
 import com.ecommerce.orders.Dto.Product;
+import com.ecommerce.orders.Events.OrderPlacedEvent;
 import com.ecommerce.orders.Model.Order;
 import com.ecommerce.orders.Repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.concurrent.Flow;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +22,9 @@ public class OrderServiceImpl implements OrderService{
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     private final String CUSTOMER_SERVICE_URL = "http://localhost:8081/customer/view/";
     private final String PRODUCT_SERVICE_URL = "http://localhost:8082/products/view/";
@@ -56,6 +62,7 @@ public class OrderServiceImpl implements OrderService{
         order.setProduct_id(request.getProduct_id());
         orderRepository.save(order);
 
+        publisher.publishEvent(new OrderPlacedEvent(request.getCustomer_id(),customer.getName(),request.getProduct_id()));
         return "Order placed!";
     }
 
