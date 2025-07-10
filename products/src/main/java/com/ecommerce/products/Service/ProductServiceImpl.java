@@ -24,12 +24,28 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public String addProduct(Product product) {
-        productRepository.save(product);
-        return "Product Added";
+        try {
+            if(productRepository.findAll().stream().
+                    anyMatch(product1 -> product1.getName().equals(product.getName()))){
+                throw new RuntimeException("Product with this name already exists!");
+            }
+            productRepository.save(product);
+            return "Product Added";
+        }
+        catch (Exception e){
+            throw new RuntimeException(product.getName()+", This product already exists");
+        }
     }
 
     @Override
     public String updateProduct(long id, Product updatedProduct) {
+        if(productRepository.findAll().stream().
+                anyMatch(product -> product.getName().equals(updatedProduct.getName())
+                        && product.getId() != id)){
+            throw new RuntimeException(
+                    updatedProduct.getName()+", this product already exists, choose a different name");
+        }
+
         return productRepository.findById(id)
                 .map(existingProduct -> {
                     existingProduct.setName(updatedProduct.getName());
